@@ -27,7 +27,17 @@ export DB_NAME={DB_FOR_STORE_PRICE}
 Run server
 
 ```
-python bin/run_accumulator.py
+python bin/run_accumulator.py [-h] [--product_code [PRODUCT_CODE]] [--freq [FREQ]]
+
+usage: run_accumulator.py [-h] [--product_code [PRODUCT_CODE]] [--freq [FREQ]]
+
+This script runs accumulation server.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --product_code [PRODUCT_CODE]
+                        product_code
+  --freq [FREQ]         frequency of data to be stored (sec)
 ```
 
 ### Slack webhook
