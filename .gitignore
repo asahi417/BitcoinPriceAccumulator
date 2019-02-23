@@ -9,12 +9,5 @@ build
 *.egg-info
 dist
 
-config.sh
-
-push
-tests
-password.*
-trading_log.log
-crontab_sample.sh
-config.toml
-.pyenv_bpa
+./config.sh
+./.pyenv_bpa

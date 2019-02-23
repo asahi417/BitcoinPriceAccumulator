@@ -18,6 +18,13 @@ class TestDB(unittest.TestCase):
         print('\ntest_connection')
         connector = btc_price.db.ConnectPSQL(host=DB_HOST, user=DB_USER, port=DB_PORT, db=DB_NAME)
         print(connector.show_table_name())
+        print(connector.show_column_name('ticker'))
+
+    # def test_show_column_name(self):
+    #     """test if connection is valid"""
+    #     print('\ntest_show_column_name')
+    #     connector = btc_price.db.ConnectPSQL(host=DB_HOST, user=DB_USER, port=DB_PORT, db=DB_NAME)
+    #     print(connector.show_table_name())
 
 
 if __name__ == "__main__":

@@ -22,7 +22,7 @@ class Public:
         """
         endpoint = "/v1/board"
         return self.api.request(endpoint, params=params)
-    
+
     def ticker(self, **params):
         """Ticker
         Parameters
@@ -39,7 +39,7 @@ class Public:
         """
         endpoint = "/v1/executions"
         return self.api.request(endpoint, params=params)
-    
+
     def get_board_state(self, **params):
         """Order book status
         Parameters
@@ -47,7 +47,7 @@ class Public:
         """
         endpoint = "/v1/getboardstate"
         return self.api.request(endpoint, params=params)
-    
+
     def get_health(self, **params):
         """Exchange status
         Parameters

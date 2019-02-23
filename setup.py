@@ -20,9 +20,10 @@ setup(
         'pandas',
         'numpy',
         'psycopg2',
-        'matplotlib',
+        'psycopg2-binary',
+        # 'matplotlib',
         'toml',
-        # 'slackweb',
+        'slackweb',
         'pytz'
     ],
     # dependency_links=[

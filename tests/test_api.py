@@ -19,6 +19,13 @@ class TestAPI(unittest.TestCase):
         output = API.markets()
         self.check(output)
 
+    def test_ticker(self):
+        """test if instance is valid"""
+        print('\ntest_ticker')
+        output = API.ticker()
+        self.check(output)
+        print(output)
+
 
 if __name__ == "__main__":
     unittest.main()

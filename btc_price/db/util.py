@@ -1,6 +1,4 @@
-"""
-Module for database operation
-"""
+""" Definition of table and instance to connect database """
 
 import pandas as pd
 from sqlalchemy import Column, Float, Integer, String, create_engine
@@ -10,24 +8,19 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
-class ProductCode(Base):
-    """Schema"""
-    __tablename__ = 'product_code'
-    product_code_id = Column(Integer, nullable=False, primary_key=True)
-    product_code = Column(String, nullable=False)
-
-
 class Ticker(Base):
     """Schema"""
     __tablename__ = 'ticker'
-    unix_time = Column(Integer, nullable=False, primary_key=True)
-    product_code_id = Column(Integer, nullable=False, primary_key=True)
+    timestamp_unix = Column(Integer, nullable=False, primary_key=True)
+    product_code = Column(String, nullable=False, primary_key=True)
     tick_id = Column(Integer, nullable=False, primary_key=True)
-    sample_period = Column(Integer, nullable=False, primary_key=True)
     best_bid = Column(Float, nullable=False)
     best_ask = Column(Float, nullable=False)
     best_bid_size = Column(Float, nullable=False)
     best_ask_size = Column(Float, nullable=False)
+    total_bid_depth = Column(Float, nullable=False)
+    total_ask_depth = Column(Float, nullable=False)
+    ltp = Column(Float, nullable=False)
     volume = Column(Float, nullable=False)
     volume_by_product = Column(Float, nullable=False)
 
@@ -35,15 +28,13 @@ class Ticker(Base):
 class ExchangeStatus(Base):
     """Schema"""
     __tablename__ = 'exchange_status'
-    unix_time = Column(Integer, nullable=False, primary_key=True)
-    tick_id = Column(Integer, nullable=False, primary_key=True)
+    timestamp_unix = Column(Integer, nullable=False, primary_key=True)
+    product_code = Column(String, nullable=False, primary_key=True)
     status = Column(String, nullable=False)
 
 
 class ConnectPSQL:
-    """
-    instance to connect postgres DB via sqlalchemy
-    """
+    """ Create connection to postgres DB via sqlalchemy """
 
     def __init__(self,
                  user: str,
@@ -53,26 +44,22 @@ class ConnectPSQL:
         self.engine = create_engine("postgresql+psycopg2://%s@%s:%i/%s" % (user, host, port, db))
         session = sessionmaker(bind=self.engine)
         self.session = session()
+        if len(self.show_table_name()) == 0:
+            self.__initialize_table()
 
-    def db_initializer(self):
+    def __initialize_table(self):
         Base.metadata.create_all(self.engine)
         self.session.commit()
 
-        # initialize `ProductCode`
-        tmp = [
-            [0, "BTC_JPY"],
-            [1, "FX_BTC_JPY"],
-            [2, "ETH_BTC"],
-            [3, "BTCJPY28APR2017"],
-            [4, "BTCJPY05MAY2017"],
-            [5, "BTC_USD"]
-        ]
-        target = pd.DataFrame(tmp, columns=["product_code_id", "product_code"])
-        target.to_sql(ProductCode.__tablename__, self.engine, if_exists='replace', index=False)
-
     def show_table_name(self):
         sql = """SELECT relname AS table_name FROM pg_stat_user_tables"""
-        return pd.read_sql(sql, self.engine)
+        df = pd.read_sql(sql, self.engine)
+        return list(df.values.T[0])
+
+    def show_column_name(self, table_name: str):
+        sql = """SELECT COLUMN_NAME FROM information_schema.columns WHERE TABLE_NAME = '%s'""" % table_name
+        df = pd.read_sql(sql, self.engine)
+        return list(df.values.T[0])
 
     # def get_historical_data(self,
     #                         period,

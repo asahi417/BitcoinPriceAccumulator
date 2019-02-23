@@ -10,7 +10,7 @@ import traceback
 class API:
 
     def __init__(self, api_key, api_secret, timeout):
-        self.api_url = "https://bf_api.bitflyer.jp"
+        self.api_url = "https://api.bitflyer.jp"
         self.api_key = api_key
         self.api_secret = api_secret
         self.timeout = timeout
