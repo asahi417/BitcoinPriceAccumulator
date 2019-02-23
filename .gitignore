@@ -9,5 +9,5 @@ build
 *.egg-info
 dist
 
-./config.sh
-./.pyenv_bpa
+config.sh
+.pyenv_bpa
