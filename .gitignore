@@ -9,6 +9,8 @@ build
 *.egg-info
 dist
 
+config.sh
+
 push
 tests
 password.*
