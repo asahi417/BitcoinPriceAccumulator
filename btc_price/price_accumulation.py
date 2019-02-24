@@ -9,6 +9,8 @@ PRODUCT_LIST = ["BTC_JPY", "FX_BTC_JPY", "ETH_BTC"]
 
 class Accumulator:
 
+    __primary_key = dict()
+
     def __init__(self,
                  user: str,
                  host: str,
@@ -41,6 +43,8 @@ class Accumulator:
             exit()
 
         self.logger('update db: %s' % product_code)
+        if product_code not in self.__primary_key.keys():
+            self.__primary_key[product_code] = dict(timestamp_utc=0)
         try:
             # price
             tick = self.api.ticker(product_code=product_code)
@@ -57,19 +61,26 @@ class Accumulator:
             volume_by_product = float(tick['volume_by_product'])
             timestamp_utc = utc_to_unix(tick['timestamp'])
 
-            data = [timestamp_utc, product_code, tick_id, best_bid, best_ask, best_bid_size,
-                    best_ask_size, total_bid_depth, total_ask_depth, ltp, volume, volume_by_product]
-            self.logger(' - price: OK')
+            # check duplication
+            if self.__primary_key[product_code]["timestamp_utc"] >= timestamp_utc:
+                self.logger(' - recent in db (%i) is later than API return (%i)'
+                            % (self.__primary_key[product_code]["timestamp_utc"], timestamp_utc))
+            else:
+                data = [timestamp_utc, product_code, tick_id, best_bid, best_ask, best_bid_size,
+                        best_ask_size, total_bid_depth, total_ask_depth, ltp, volume, volume_by_product]
+                self.logger(' - price: OK')
 
-            # health
-            health = self.api.get_health(product_code=product_code)
-            data_health = [timestamp_utc, product_code, health['status']]
+                # health
+                health = self.api.get_health(product_code=product_code)
+                data_health = [timestamp_utc, product_code, health['status']]
 
-            # update
-            self.__insert_db(data, data_health)
-            self.logger(' - health: OK')
+                # update
+                self.__insert_db(data, data_health)
+                self.logger(' - health: OK')
+
+                self.__primary_key[product_code]['timestamp_utc'] = timestamp_utc
+
         except Exception:
             error_msg = traceback.format_exc()
             self.logger('ERROR: %s' % error_msg, push_all=True)
             exit()
-
