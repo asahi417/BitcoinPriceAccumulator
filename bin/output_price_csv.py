@@ -40,7 +40,7 @@ if __name__ == '__main__':
         if os.path.exists(out_file):
             print(' - found file: %s' % out_file)
             continue
-        sql = """SELECT * FROM ticker WHERE timestamp_unix > '%i' and timestamp_unix < '%i' ORDER BY timestamp_unix DESC """ \
+        sql = """SELECT * FROM ticker WHERE timestamp_unix >= '%i' and timestamp_unix < '%i' ORDER BY timestamp_unix DESC """ \
               % (__unix_start, __unix_end)
         out = connector.execute_sql(sql)
         out.to_csv(out_file)
