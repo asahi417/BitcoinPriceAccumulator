@@ -5,7 +5,7 @@ import btc_price
 
 
 class TestDB(unittest.TestCase):
-    """Test for btc_price/util.py"""
+    """Test for btc_price/connect_psql.py"""
 
     def test_time(self):
         """test utc_to_unix"""

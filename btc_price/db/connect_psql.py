@@ -61,6 +61,15 @@ class ConnectPSQL:
         df = pd.read_sql(sql, self.engine)
         return list(df.values.T[0])
 
+    def execute_sql(self, sql_command):
+        df = pd.read_sql(sql_command, self.engine)
+        return df
+
+    # def to_csv(self, ):
+    #     sql = """SELECT * FROM ticker ORDER BY timestamp_unix ASC LIMIt 10"""
+    #     out = self.execute_sql(sql)
+
+
     # def get_historical_data(self,
     #                         period,
     #                         limit=10,

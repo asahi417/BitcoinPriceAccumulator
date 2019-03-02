@@ -1,1 +1,1 @@
-from .util import ConnectPSQL, Ticker, ExchangeStatus
+from .connect_psql import ConnectPSQL, Ticker, ExchangeStatus
