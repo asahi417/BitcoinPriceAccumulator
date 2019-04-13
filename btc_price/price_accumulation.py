@@ -35,12 +35,23 @@ class Accumulator:
         df = pd.DataFrame([data_health], columns=column_name)
         df.to_sql(ExchangeStatus.__tablename__, self.connection.engine, if_exists='append', index=False)
 
-    def update(self,
-               product_code: str):
+    def update(self, product_code: str):
+        """
+
+         Parameter
+        ----------------
+        product_code: str
+            product_code
+
+         Return
+        ----------------
+        error_code: int
+            0 (no error), 1 (data from API is outdated, no update), -1 (API get_tick return error)
+        """
 
         if product_code not in PRODUCT_LIST:
             self.logger('ERROR: invalid product_code: %s not in %s' % (product_code, PRODUCT_LIST), push_all=True)
-            exit()
+            raise ValueError('ERROR: invalid product_code: %s not in %s' % (product_code, PRODUCT_LIST))
 
         self.logger('update db: %s' % product_code)
         if product_code not in self.__primary_key.keys():
@@ -48,23 +59,30 @@ class Accumulator:
         try:
             # price
             tick = self.api.ticker(product_code=product_code)
-            product_code = tick['product_code']
-            tick_id = int(tick['tick_id'])
-            best_bid = float(tick['best_bid'])
-            best_ask = float(tick['best_ask'])
-            best_bid_size = float(tick['best_bid_size'])
-            best_ask_size = float(tick['best_ask_size'])
-            total_bid_depth = float(tick['total_bid_depth'])
-            total_ask_depth = float(tick['total_ask_depth'])
-            ltp = float(tick['ltp'])
-            volume = float(tick['volume'])
-            volume_by_product = float(tick['volume_by_product'])
-            timestamp_utc = utc_to_unix(tick['timestamp'])
+            try:
+                product_code = tick['product_code']
+                tick_id = int(tick['tick_id'])
+                best_bid = float(tick['best_bid'])
+                best_ask = float(tick['best_ask'])
+                best_bid_size = float(tick['best_bid_size'])
+                best_ask_size = float(tick['best_ask_size'])
+                total_bid_depth = float(tick['total_bid_depth'])
+                total_ask_depth = float(tick['total_ask_depth'])
+                ltp = float(tick['ltp'])
+                volume = float(tick['volume'])
+                volume_by_product = float(tick['volume_by_product'])
+                timestamp_utc = utc_to_unix(tick['timestamp'])
+            except KeyError:
+                error_msg = traceback.format_exc()
+                self.logger('KeyError: API output\n %s' % tick)
+                self.logger('Original Error Message:\n %s' % error_msg, push_all=True)
+                return -1
 
             # check duplication
             if self.__primary_key[product_code]["timestamp_utc"] >= timestamp_utc:
                 self.logger(' - recent in db (%i) is later than API return (%i)'
                             % (self.__primary_key[product_code]["timestamp_utc"], timestamp_utc))
+                return 1
             else:
                 data = [timestamp_utc, product_code, tick_id, best_bid, best_ask, best_bid_size,
                         best_ask_size, total_bid_depth, total_ask_depth, ltp, volume, volume_by_product]
@@ -79,8 +97,10 @@ class Accumulator:
                 self.logger(' - health: OK')
 
                 self.__primary_key[product_code]['timestamp_utc'] = timestamp_utc
+                return 0
 
         except Exception:
             error_msg = traceback.format_exc()
             self.logger('ERROR: %s' % error_msg, push_all=True)
-            exit()
+            raise ValueError(error_msg)
+
